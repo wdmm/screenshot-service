@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { Button, Grid, IconButton } from '@mui/material';
-import { DeleteOutlined, PhotoCamera } from '@mui/icons-material';
+import { Button, ButtonGroup, Grid, IconButton } from '@mui/material';
+import { Delete, DeleteOutlined, PhotoCamera } from '@mui/icons-material';
 import MultiActionAreaCard from './MultiActionAreaCard';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 function App() {
   const [image, setImage] = useState('');
+  const [iName, setIName] = useState('');
 
   const capture = async () => {
     const canvas = document.createElement("canvas");  
@@ -24,10 +26,37 @@ function App() {
       const frame = canvas.toDataURL();
 
       setImage(frame);
+      setIName(`photo_${new Date().toISOString()}.jpg`);
       
     } catch (err) {
       console.error("Error: " + err);
     }
+  };
+
+  const saveToFile = async (image) => {
+    // this turns the base 64 string to a [File] object
+    const res = await fetch(image);
+    const buff = await res.arrayBuffer();
+    // clone so we can rename, and put into array for easy proccessing
+    const file = [
+      new File([buff], iName, {
+        type: 'image/jpeg',
+      }),
+    ];
+
+    const opts = {
+      suggestedName: iName,
+      types: [{
+        description: 'Image file',
+        accept: {'image/jpeg': ['.jpeg']},
+      }],
+    };
+
+    const fileHandle = await window.showSaveFilePicker(opts).catch((e)=>console.log(e));
+    if (!fileHandle) return;
+    const fileStream = await fileHandle.createWritable();
+    await fileStream.write(file[0], {type: "image/jpeg"});
+    await fileStream.close();
   };
 
   return (
@@ -37,11 +66,11 @@ function App() {
       >
         <Grid item m={2}>
           <Button onClick={capture} variant="contained" endIcon={<PhotoCamera />}>Take screenshot</Button>
-          { image && <IconButton onClick={() => setImage('')}  aria-label="delete"><DeleteOutlined /></IconButton> }
+          { image && <IconButton color="error" onClick={() => setImage('')}  aria-label="delete"><DeleteOutlined /></IconButton> }
         </Grid>
         { image && 
-          <Grid item m={2} style={{ maxWidth:"300px" }}>
-            <MultiActionAreaCard image={image}></MultiActionAreaCard>
+          <Grid item m={2} style={{ maxWidth:"360px" }}>
+            <MultiActionAreaCard image={image} saveToFile={saveToFile} fileName={iName}></MultiActionAreaCard>
           </Grid>
         }
       </Grid>

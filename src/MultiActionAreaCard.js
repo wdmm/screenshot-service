@@ -6,11 +6,11 @@ import Typography from '@mui/material/Typography';
 import { Button, CardActionArea, CardActions } from '@mui/material';
 
 export default function MultiActionAreaCard(props) {
-  const { image } = props;
+  const { image, saveToFile, fileName } = props;
 
   return (
     <Card>
-      <CardActionArea>
+      <CardActionArea onClick={()=>saveToFile(image)}>
         <CardMedia
           component="img"
         //   width={"150px"}
@@ -18,11 +18,11 @@ export default function MultiActionAreaCard(props) {
           alt="screenshot"
         />
         <CardContent>
-          <Typography gutterBottom variant="h6" component="div">
-            Lizard
+          <Typography gutterBottom variant="subtitle1" component="div">
+            {fileName}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Lizards are a widespread group of squamate reptiles, with over 6,000 species
+          <Typography variant="caption" color="text.secondary">
+            Click to download
           </Typography>
         </CardContent>
       </CardActionArea>
